@@ -27,7 +27,7 @@ const hasPrevPage = computed(() => {
 });
 
 const hasNextPage = computed(() => {
-  return data.value.nextPage;
+  return data.value.nextPage !== "";
 });
 
 function loadNextPage(pageNumber) {

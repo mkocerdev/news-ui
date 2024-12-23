@@ -5,13 +5,13 @@ defineProps({
 </script>
 
 <template>
-  <button class="app-button" v-bind="$attrs" v-on="$listeners">
+  <button class="app-button" v-bind="$attrs">
     <template v-if="title">
       {{ title }}
     </template>
     <slot v-else />
   </button>
-</template>
+</template> 
 
 <style lang="scss" scoped>
 .app-button {
