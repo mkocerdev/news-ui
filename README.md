@@ -4,6 +4,11 @@ Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduct
 
 ## Setup
 
+Make sure to add .ENV File:
+
+API_BASE_URL=https://newsdata.io/api/1
+API_KEY=pub_63164af692c808492ab56888b56fd9e7059b8
+
 Make sure to install dependencies:
 
 ```bash
