@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import type {
+  NewsApiResponse,
+  NewsApiNextPage,
+  NewsApiResults,
+} from "@/features/news/types";
+
 import NewsBox from "@/features/news/containers/NewsBox.vue";
 import NewsPagination from "@/features/news/containers/NewsPagination.vue";
 const params = {
@@ -14,13 +20,16 @@ const { getPage, hasPrevPage, hasNextPage, loadNextPage, loadPrevPage } =
 
 const { $api } = useNuxtApp();
 const { data, status, error, refresh } = await useAsyncData(() => {
-  return $api("/latest", {
+  return $api<NewsApiResponse>("/latest", {
     query: { ...params, ...(getPage && { page: getPage.value }) },
   });
 });
 
-const getData: any = computed(() => {
-  return data.value;
+const nextPage: ComputedRef<NewsApiNextPage | any> = computed(() => {
+  return data.value?.nextPage as NewsApiNextPage;
+});
+const getResults: ComputedRef<NewsApiResults> = computed(() => {
+  return data?.value?.results as NewsApiResults;
 });
 
 watch(getPage, () => refresh());
@@ -42,24 +51,20 @@ useHead({
           <template v-if="status === 'pending'"> Loading</template>
           <template v-else-if="(status = 'success')">
             <div class="page__news">
-              <template v-for="(item, index) in getData.results">
-                <NewsBox
-                  :title="item.title"
-                  :articleId="item.article_id"
-                  :image-url="item.image_url"
-                />
+              <template v-for="(article, index) in getResults" :key="index">
+                <NewsBox :article="article" />
               </template>
             </div>
-            <NewsPagination
-              :prev="hasPrevPage"
-              :next="hasNextPage"
-              @next="loadNextPage(getData.nextPage)"
-              @prev="loadPrevPage()"
-            />
           </template>
           <template v-else>
             {{ error }}
           </template>
+          <NewsPagination
+            :prev="hasPrevPage"
+            :next="hasNextPage"
+            @next="loadNextPage(nextPage)"
+            @prev="loadPrevPage()"
+          />
         </div>
       </div>
     </div>

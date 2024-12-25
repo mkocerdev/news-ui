@@ -1,34 +1,25 @@
 <script setup lang="ts">
+import type { NewsApiResponse, NewsArticle } from "@/features/news/types";
+
 const route = useRoute();
 const router = useRouter();
 const goToHomepage = () => router.push("/");
-
 const { $api } = useNuxtApp();
 const { data, status, error } = await useAsyncData(() => {
-  return $api("/latest", {
+  return $api<NewsApiResponse>("/latest", {
     query: { ...(route.params.article && { id: route.params.article }) },
   });
 });
-const getData: any = computed(() => {
-  return data.value;
+
+const getArticle: ComputedRef<NewsArticle> = computed(() => {
+  return data?.value?.results[0] as NewsArticle;
 });
-const title = computed(() =>
-  status.value === "success" ? getData.value.results[0].title : ""
-);
-const image_url = computed(() =>
-  status.value === "success" ? getData.value.results[0].image_url : ""
-);
-const description = computed(() =>
-  status.value === "success" ? getData.value.results[0].description : ""
-);
-const keywords = computed(() =>
-  status.value === "success" ? getData.value.results[0].keywords : ""
-);
+
 useHead({
-  title: title,
+  title: getArticle.value.title,
   meta: [
-    { name: "description", content: description },
-    { name: "keywords", content: keywords },
+    { name: "description", content: getArticle.value.description },
+    { name: "keywords", content: getArticle.value.keywords },
   ],
 });
 </script>
@@ -43,10 +34,14 @@ useHead({
         <AppButton @click="goToHomepage">Back Homepage</AppButton>
         <template v-if="status === 'pending'"> Loading</template>
         <template v-else-if="(status = 'success')">
-          <h1 class="page__title">{{ title }}</h1>
-          <img class="page__img" :src="image_url" :alt="title" />
+          <h1 class="page__title">{{ getArticle.title }}</h1>
+          <img
+            class="page__img"
+            :src="getArticle.image_url"
+            :alt="getArticle.title"
+          />
           <div class="page__description">
-            {{ description }}
+            {{ getArticle.description }}
           </div>
         </template>
         <template v-else>
@@ -59,8 +54,13 @@ useHead({
 
 <style lang="scss" scoped>
 .page {
+  margin-top: 1rem;
+  margin-bottom: 5rem;
   &__img {
     max-width: 100%;
+  }
+  &__description {
+    margin-top: 1rem;
   }
 }
 </style>
