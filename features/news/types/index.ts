@@ -12,6 +12,7 @@ export type NewsApiResults = NewsApiResponse["results"];
 export interface NewsArticle {
   article_id: string;
   title: string;
+  image_url: string | "";
   link: string;
   keywords: string[] | null;
   creator: string[] | null;
@@ -20,7 +21,6 @@ export interface NewsArticle {
   content: string | null;
   pubDate: string;
   pubDateTZ: string;
-  image_url: string | "";
   source_id: string;
   source_priority: number;
   source_name: string;

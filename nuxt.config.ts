@@ -8,6 +8,7 @@ export default defineNuxtConfig({
       apiKey: process.env.API_KEY,
     },
   },
+  modules: ["@nuxt/test-utils/module"],
   vite: {
     css: {
       preprocessorOptions: {
