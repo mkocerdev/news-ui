@@ -6,62 +6,62 @@ const params = {
   language: ["en"],
   size: 10,
   image: 1,
-  apikey: "pub_63164af692c808492ab56888b56fd9e7059b8",
-};
+} as any;
 
-const pages = ref([]);
+import { usePagination } from "@/composable/usePagination";
+const { getPage, hasPrevPage, hasNextPage, loadNextPage, loadPrevPage } =
+  usePagination();
 
-const getPage = computed(() => {
-  return pages.value[pages.value.length - 1];
+const { $api } = useNuxtApp();
+const { data, status, error, refresh } = await useAsyncData(() => {
+  return $api("/latest", {
+    query: { ...params, ...(getPage && { page: getPage.value }) },
+  });
 });
 
-const { data, refresh, status, error } = await useFetch(
-  `https://newsdata.io/api/1/latest`,
-  {
-    query: { ...params, ...(getPage && { page: getPage }) },
-  }
-);
-
-const hasPrevPage = computed(() => {
-  return pages.value.length > 0;
+const getData: any = computed(() => {
+  return data.value;
 });
 
-const hasNextPage = computed(() => {
-  return data.value.nextPage !== "";
+watch(getPage, () => refresh());
+useHead({
+  title: "News Homepage",
+  meta: [
+    { name: "description", content: "This is news page." },
+    { name: "keywords", content: "News, Journal, Break News" },
+  ],
 });
-
-function loadNextPage(pageNumber) {
-  pages.value.push(pageNumber);
-}
-function loadPrevPage() {
-  pages.value.pop();
-}
 </script>
 
 <template>
   <div class="page">
     <div class="page__container">
-      <div v-if="status === 'pending'">Loading...</div>
-      <div v-else-if="status === 'success'">
-        <h1 class="page__title">News</h1>
-
-        <div class="page__news">
-          <template v-for="(item, index) in data.results">
-            <NewsBox
-              :title="item.title"
-              :articleId="item.article_id"
-              :image-url="item.image_url"
+      <div class="page">
+        <div class="page__container">
+          <h1 class="page__title">News</h1>
+          <template v-if="status === 'pending'"> Loading</template>
+          <template v-else-if="(status = 'success')">
+            <div class="page__news">
+              <template v-for="(item, index) in getData.results">
+                <NewsBox
+                  :title="item.title"
+                  :articleId="item.article_id"
+                  :image-url="item.image_url"
+                />
+              </template>
+            </div>
+            <NewsPagination
+              :prev="hasPrevPage"
+              :next="hasNextPage"
+              @next="loadNextPage(getData.nextPage)"
+              @prev="loadPrevPage()"
             />
           </template>
+          <template v-else>
+            {{ error }}
+          </template>
         </div>
-        <NewsPagination
-          :prev="hasPrevPage"
-          :next="hasNextPage"
-          @next="loadNextPage(data.nextPage)"
-          @prev="loadPrevPage()"
-        />
       </div>
-      <div v-else-if="status === 'error'">{{ error }}</div>
     </div>
   </div>
 </template>

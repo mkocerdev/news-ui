@@ -8,7 +8,7 @@ defineProps({
 
 <template>
   <div class="news-box">
-    <NuxtLink :to="`news/${articleId}`" class="news-box__link">
+    <NuxtLink :to="`/news/${articleId}`" class="news-box__link">
       <div class="news-box__img">
         <img :src="imageUrl" :alt="title" />
       </div>
